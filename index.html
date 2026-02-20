@@ -101,7 +101,7 @@
   /* Main layout: map left, panel right */
   .main-layout {
     display: flex;
-    height: calc(100vh - var(--header-height));
+    height: calc(100vh - var(--header-height) - 30px);
   }
 
   /* Map */
@@ -570,9 +570,25 @@
     min-width: 110px;
     text-align: center;
   }
+
+  /* Mockup disclaimer banner */
+  .demo-banner {
+    background: #fef3c7;
+    border-bottom: 1px solid #f59e0b;
+    padding: 6px 20px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: #92400e;
+    flex-shrink: 0;
+    z-index: 1001;
+  }
 </style>
 </head>
 <body>
+
+<!-- Mockup Disclaimer -->
+<div class="demo-banner">MOCKUP DEMONSTRATION — Simulated data for illustrative purposes only. Not real sensor readings.</div>
 
 <!-- Header -->
 <div class="header">
