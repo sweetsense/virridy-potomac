@@ -711,26 +711,26 @@
 <script>
 // ── Sensor Locations — Potomac River Sewage Spill Monitoring Network ──
 const sensors = [
-  { id: 'pt1',  name: 'Potomac — Seneca Breaks',             type: 'Sewage Spill Response', lat: 39.0692, lng: -77.3409, region: 'Seneca, MD' },
-  { id: 'pt2',  name: 'Potomac — Pennyfield Lock',           type: 'Sewage Spill Response', lat: 39.0168, lng: -77.2330, region: 'Potomac, MD' },
-  { id: 'pt3',  name: 'Potomac — Great Falls Overlook',      type: 'Sewage Spill Response', lat: 38.9986, lng: -77.2542, region: 'Great Falls, MD' },
-  { id: 'pt4',  name: 'Potomac — Widewater / Mather Gorge',  type: 'Sewage Spill Response', lat: 38.9843, lng: -77.2355, region: 'Potomac, MD' },
-  { id: 'pt5',  name: 'Potomac — Carderock Recreation Area',  type: 'Sewage Spill Response', lat: 38.9717, lng: -77.1997, region: 'Bethesda, MD', status: 'yellow' },
-  { id: 'pt6',  name: 'Potomac — Lock 10 / Clara Barton Pkwy', type: 'Sewage Spill Response', lat: 38.9723, lng: -77.1686, region: 'Cabin John, MD', status: 'red' },
-  { id: 'pt7',  name: 'Potomac — Cabin John Creek Confluence', type: 'Sewage Spill Response', lat: 38.9576, lng: -77.1535, region: 'Cabin John, MD', status: 'red' },
-  { id: 'pt8',  name: 'Potomac — Little Falls Dam',           type: 'Sewage Spill Response', lat: 38.9498, lng: -77.1276, region: 'Bethesda, MD', status: 'red' },
-  { id: 'pt9',  name: 'Potomac — Chain Bridge',               type: 'Sewage Spill Response', lat: 38.9296, lng: -77.1169, region: 'Washington, DC', status: 'red' },
-  { id: 'pt10', name: 'Potomac — Fletcher\'s Cove',           type: 'Sewage Spill Response', lat: 38.9186, lng: -77.1031, region: 'Washington, DC', status: 'red' },
-  { id: 'pt11', name: 'Potomac — Georgetown Waterfront',      type: 'Sewage Spill Response', lat: 38.9034, lng: -77.0677, region: 'Washington, DC', status: 'red' },
-  { id: 'pt12', name: 'Potomac — Roosevelt Island',           type: 'Sewage Spill Response', lat: 38.8951, lng: -77.0619, region: 'Washington, DC', status: 'red' },
-  { id: 'pt13', name: 'Potomac — Arlington Memorial Bridge',  type: 'Sewage Spill Response', lat: 38.8874, lng: -77.0555, region: 'Washington, DC', status: 'yellow' },
-  { id: 'pt14', name: 'Potomac — Hains Point',                type: 'Sewage Spill Response', lat: 38.8607, lng: -77.0233, region: 'Washington, DC', status: 'yellow' },
-  { id: 'pt15', name: 'Potomac — Anacostia Confluence',       type: 'Sewage Spill Response', lat: 38.8622, lng: -77.0101, region: 'Washington, DC', status: 'yellow' },
-  { id: 'pt16', name: 'Potomac — Blue Plains AWWTP',          type: 'Sewage Spill Response', lat: 38.8314, lng: -77.0099, region: 'Washington, DC', status: 'yellow' },
-  { id: 'pt17', name: 'Potomac — National Harbor',            type: 'Sewage Spill Response', lat: 38.7826, lng: -77.0151, region: 'Oxon Hill, MD', status: 'yellow' },
-  { id: 'pt18', name: 'Potomac — Fort Washington',            type: 'Sewage Spill Response', lat: 38.7117, lng: -77.0317, region: 'Fort Washington, MD' },
-  { id: 'pt19', name: 'Potomac — Piscataway Creek',           type: 'Sewage Spill Response', lat: 38.6925, lng: -77.0505, region: 'Accokeek, MD' },
-  { id: 'pt20', name: 'Potomac — Mattawoman Creek',           type: 'Sewage Spill Response', lat: 38.5955, lng: -77.1678, region: 'Indian Head, MD' },
+  { id: 'pt1',  name: 'Potomac — Seneca Breaks',             type: 'Sewage Spill Response', lat: 39.0692, lng: -77.3408, region: 'Seneca, MD' },
+  { id: 'pt2',  name: 'Potomac — Pennyfield Lock',           type: 'Sewage Spill Response', lat: 39.0201, lng: -77.2386, region: 'Potomac, MD' },
+  { id: 'pt3',  name: 'Potomac — Great Falls Overlook',      type: 'Sewage Spill Response', lat: 38.9985, lng: -77.2544, region: 'Great Falls, MD' },
+  { id: 'pt4',  name: 'Potomac — Widewater / Mather Gorge',  type: 'Sewage Spill Response', lat: 38.9821, lng: -77.2342, region: 'Potomac, MD' },
+  { id: 'pt5',  name: 'Potomac — Carderock Recreation Area',  type: 'Sewage Spill Response', lat: 38.9703, lng: -77.2003, region: 'Bethesda, MD', status: 'yellow' },
+  { id: 'pt6',  name: 'Potomac — Lock 10 / Clara Barton Pkwy', type: 'Sewage Spill Response', lat: 38.9711, lng: -77.1683, region: 'Cabin John, MD', status: 'red' },
+  { id: 'pt7',  name: 'Potomac — Cabin John Creek Confluence', type: 'Sewage Spill Response', lat: 38.9655, lng: -77.1519, region: 'Cabin John, MD', status: 'red' },
+  { id: 'pt8',  name: 'Potomac — Little Falls Dam',           type: 'Sewage Spill Response', lat: 38.9500, lng: -77.1273, region: 'Bethesda, MD', status: 'red' },
+  { id: 'pt9',  name: 'Potomac — Chain Bridge',               type: 'Sewage Spill Response', lat: 38.9299, lng: -77.1164, region: 'Washington, DC', status: 'red' },
+  { id: 'pt10', name: 'Potomac — Fletcher\'s Cove',           type: 'Sewage Spill Response', lat: 38.9187, lng: -77.1029, region: 'Washington, DC', status: 'red' },
+  { id: 'pt11', name: 'Potomac — Georgetown Waterfront',      type: 'Sewage Spill Response', lat: 38.9032, lng: -77.0678, region: 'Washington, DC', status: 'red' },
+  { id: 'pt12', name: 'Potomac — Roosevelt Island',           type: 'Sewage Spill Response', lat: 38.8936, lng: -77.0660, region: 'Washington, DC', status: 'red' },
+  { id: 'pt13', name: 'Potomac — Arlington Memorial Bridge',  type: 'Sewage Spill Response', lat: 38.8899, lng: -77.0532, region: 'Washington, DC', status: 'yellow' },
+  { id: 'pt14', name: 'Potomac — Hains Point',                type: 'Sewage Spill Response', lat: 38.8612, lng: -77.0181, region: 'Washington, DC', status: 'yellow' },
+  { id: 'pt15', name: 'Potomac — Anacostia Confluence',       type: 'Sewage Spill Response', lat: 38.8612, lng: -77.0095, region: 'Washington, DC', status: 'yellow' },
+  { id: 'pt16', name: 'Potomac — Blue Plains AWWTP',          type: 'Sewage Spill Response', lat: 38.8335, lng: -77.0238, region: 'Washington, DC', status: 'yellow' },
+  { id: 'pt17', name: 'Potomac — National Harbor',            type: 'Sewage Spill Response', lat: 38.7846, lng: -77.0175, region: 'Oxon Hill, MD', status: 'yellow' },
+  { id: 'pt18', name: 'Potomac — Fort Washington',            type: 'Sewage Spill Response', lat: 38.7147, lng: -77.0338, region: 'Fort Washington, MD' },
+  { id: 'pt19', name: 'Potomac — Piscataway Creek',           type: 'Sewage Spill Response', lat: 38.6931, lng: -77.0525, region: 'Accokeek, MD' },
+  { id: 'pt20', name: 'Potomac — Mattawoman Creek',           type: 'Sewage Spill Response', lat: 38.5903, lng: -77.1604, region: 'Indian Head, MD' },
 ];
 
 // ── Build welcome sensor list ──
@@ -832,13 +832,17 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 }).addTo(map);
 
 // ── Potomac River outline from USGS NHD ──
+let riverPolygons = null;
 fetch('potomac-river.geojson')
   .then(r => r.json())
   .then(geojson => {
+    riverPolygons = geojson;
     L.geoJSON(geojson, {
-      style: { color: '#005151', weight: 1, opacity: 0.4, fillColor: '#007a7a', fillOpacity: 0.15 },
+      style: { color: '#005151', weight: 1, opacity: 0.4, fillColor: 'transparent', fillOpacity: 0 },
       interactive: false,
     }).addTo(map);
+    // Redraw canvas now that polygon data is available
+    if (typeof redrawCanvas === 'function') redrawCanvas();
   });
 
 function sensorIcon(status) {
@@ -899,79 +903,77 @@ function valColor(v, m) {
   return `rgb(${s.cols[s.cols.length-1].join(',')})`;
 }
 
-const NUM_SEGS = 60;
-
 // ── Potomac River Path & Visualization ──
 const riverCfg = {
   label: 'Potomac River — Sewage Spill',
   defaultMetric: 'ecoli',
   sensorIds: ['pt1','pt2','pt3','pt4','pt5','pt6','pt7','pt8','pt9','pt10','pt11','pt12','pt13','pt14','pt15','pt16','pt17','pt18','pt19','pt20'],
-  sensorIdx: [0, 4, 7, 9, 14, 18, 23, 27, 31, 35, 40, 44, 47, 52, 54, 58, 62, 67, 70, 75],
+  sensorIdx: [0, 4, 7, 9, 14, 18, 22, 26, 30, 34, 39, 43, 46, 51, 53, 57, 61, 66, 69, 74],
   path: [
     // pt1 Seneca Breaks
     [39.0692,-77.3409],
-    [39.0581,-77.3218],[39.0432,-77.3008],[39.0311,-77.2780],
+    [39.0581,-77.3218],[39.0461,-77.3000],[39.0343,-77.2743],
     // pt2 Pennyfield Lock
-    [39.0168,-77.2330],
+    [39.0202,-77.2389],
     [39.0108,-77.2488],[39.0010,-77.2535],
     // pt3 Great Falls Overlook
     [38.9986,-77.2542],
     [38.9960,-77.2530],
     // pt4 Widewater / Mather Gorge
-    [38.9843,-77.2355],
-    [38.9830,-77.2300],[38.9810,-77.2230],[38.9795,-77.2150],
+    [38.9820,-77.2342],
+    [38.9818,-77.2310],[38.9791,-77.2260],[38.9775,-77.2112],
     [38.9770,-77.2080],
     // pt5 Carderock
-    [38.9717,-77.1997],
-    [38.9700,-77.1940],[38.9690,-77.1870],[38.9710,-77.1780],
+    [38.9703,-77.2003],
+    [38.9700,-77.1940],[38.9690,-77.1870],[38.9691,-77.1782],
     // pt6 Lock 10 / Clara Barton Pkwy (SPILL SITE)
-    [38.9723,-77.1686],
-    [38.9710,-77.1640],[38.9680,-77.1590],[38.9640,-77.1560],
+    [38.9710,-77.1683],
+    [38.9710,-77.1640],[38.9680,-77.1590],[38.9663,-77.1555],
     // pt7 Cabin John Creek Confluence
-    [38.9576,-77.1535],
-    [38.9550,-77.1470],[38.9530,-77.1410],[38.9510,-77.1340],
+    [38.9659,-77.1518],
+    [38.9603,-77.1423],[38.9563,-77.1380],[38.9510,-77.1340],
     // pt8 Little Falls Dam
     [38.9498,-77.1276],
-    [38.9465,-77.1260],[38.9430,-77.1235],[38.9390,-77.1215],
+    [38.9465,-77.1260],[38.9429,-77.1239],[38.9388,-77.1216],
     // pt9 Chain Bridge
-    [38.9296,-77.1169],
+    [38.9300,-77.1164],
     [38.9270,-77.1140],[38.9240,-77.1110],[38.9210,-77.1065],
     // pt10 Fletcher's Cove
     [38.9186,-77.1031],
-    [38.9160,-77.0980],[38.9130,-77.0900],[38.9100,-77.0820],
-    [38.9080,-77.0760],
+    [38.9145,-77.1010],[38.9079,-77.0927],[38.9047,-77.0835],
+    [38.9043,-77.0762],
     // pt11 Georgetown Waterfront
-    [38.9034,-77.0677],
-    [38.9010,-77.0650],[38.8990,-77.0640],[38.8970,-77.0633],
+    [38.9032,-77.0678],
+    [38.9010,-77.0650],[38.9016,-77.0628],[38.8960,-77.0668],
     // pt12 Roosevelt Island
-    [38.8951,-77.0619],
+    [38.8939,-77.0661],
     [38.8930,-77.0590],[38.8910,-77.0575],
     // pt13 Arlington Memorial Bridge
     [38.8874,-77.0555],
-    [38.8850,-77.0520],[38.8820,-77.0440],[38.8780,-77.0370],
-    [38.8740,-77.0310],
+    [38.8850,-77.0520],[38.8818,-77.0441],[38.8806,-77.0402],
+    [38.8802,-77.0266],
     // pt14 Hains Point
-    [38.8607,-77.0233],
+    [38.8612,-77.0178],
     [38.8615,-77.0170],
     // pt15 Anacostia Confluence
     [38.8622,-77.0101],
-    [38.8540,-77.0130],[38.8440,-77.0110],[38.8370,-77.0100],
+    [38.8557,-77.0164],[38.8459,-77.0218],[38.8412,-77.0234],
     // pt16 Blue Plains AWWTP
-    [38.8314,-77.0099],
-    [38.8200,-77.0120],[38.8060,-77.0135],[38.7926,-77.0143],
+    [38.8337,-77.0252],
+    [38.8159,-77.0061],[38.8068,-77.0151],[38.7904,-77.0166],
     // pt17 National Harbor
-    [38.7826,-77.0151],
-    [38.7700,-77.0175],[38.7580,-77.0200],[38.7430,-77.0240],
-    [38.7290,-77.0280],
+    [38.7847,-77.0176],
+    [38.7691,-77.0309],[38.7573,-77.0272],[38.7430,-77.0240],
+    [38.7293,-77.0302],
     // pt18 Fort Washington
-    [38.7117,-77.0317],
+    [38.7148,-77.0339],
     [38.7050,-77.0390],[38.6985,-77.0445],
     // pt19 Piscataway Creek
-    [38.6925,-77.0505],
-    [38.6780,-77.0720],[38.6600,-77.0950],[38.6380,-77.1180],
+    [38.6931,-77.0526],
+    [38.6914,-77.0844],[38.6495,-77.0899],[38.6380,-77.1180],
     [38.6150,-77.1430],
     // pt20 Mattawoman Creek / Indian Head
-    [38.5955,-77.1678],
+    [38.5900,-77.1600],
   ],
 };
 
@@ -1003,13 +1005,22 @@ function interp(frac, tIdx, metric) {
 }
 
 const defaultMetric = riverCfg.defaultMetric || 'ecoli';
-let segs = [], bgLine = null, ctrl = null, playing = false, frame = nFrames-1, timer = null, speed = 12, metric = defaultMetric;
+let riverCanvas = null, riverCtx = null, ctrl = null, playing = false, frame = nFrames-1, timer = null, speed = 12, metric = defaultMetric;
+const CANVAS_SEGS = 200;
 
 function initRiver() {
-  bgLine = L.polyline(riverCfg.path, { color:'#003d3d', weight:9, opacity:0.25, lineCap:'round', lineJoin:'round' }).addTo(map);
-  for (let i = 0; i < NUM_SEGS; i++) {
-    segs.push(L.polyline([ptAt(i/NUM_SEGS), ptAt((i+1)/NUM_SEGS)], { color:'#93d500', weight:6, opacity:0.9, lineCap:'round', lineJoin:'round' }).addTo(map));
-  }
+  // Create canvas overlay on the map's overlay pane
+  riverCanvas = document.createElement('canvas');
+  riverCanvas.style.position = 'absolute';
+  riverCanvas.style.top = '0';
+  riverCanvas.style.left = '0';
+  riverCanvas.style.pointerEvents = 'none';
+  riverCanvas.style.zIndex = '250';
+  map.getPane('overlayPane').appendChild(riverCanvas);
+  riverCtx = riverCanvas.getContext('2d');
+
+  map.on('moveend zoomend resize', redrawCanvas);
+
   ctrl = document.createElement('div');
   ctrl.className = 'creek-controls';
   ctrl.innerHTML = `<div class="creek-controls-inner">
@@ -1030,9 +1041,66 @@ function initRiver() {
   ctrl.querySelector('.creek-speed-select').addEventListener('change', e => { speed = +e.target.value; if (playing) { stopRiver(); startRiver(); } });
   updateRiver(frame);
 }
+
+function redrawCanvas() {
+  if (!riverCanvas || !riverPolygons) return;
+  const size = map.getSize();
+  const topLeft = map.containerPointToLayerPoint([0, 0]);
+  L.DomUtil.setPosition(riverCanvas, topLeft);
+  riverCanvas.width = size.x;
+  riverCanvas.height = size.y;
+  const ctx = riverCtx;
+  ctx.clearRect(0, 0, size.x, size.y);
+
+  // Helper: convert [lng, lat] GeoJSON coord to canvas pixel
+  function toPixel(coord) {
+    const pt = map.latLngToContainerPoint([coord[1], coord[0]]);
+    return [pt.x, pt.y];
+  }
+
+  // Build clip path from all polygon features
+  ctx.save();
+  ctx.beginPath();
+  riverPolygons.features.forEach(feat => {
+    const rings = feat.geometry.coordinates;
+    rings.forEach(ring => {
+      const px = ring.map(toPixel);
+      ctx.moveTo(px[0][0], px[0][1]);
+      for (let j = 1; j < px.length; j++) ctx.lineTo(px[j][0], px[j][1]);
+      ctx.closePath();
+    });
+  });
+  ctx.clip('evenodd');
+
+  // Draw colored segments along the centerline, clipped to the river polygon
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  const zoom = map.getZoom();
+  const lineWidth = Math.max(8, Math.pow(2, zoom - 10) * 20);
+  ctx.lineWidth = lineWidth;
+  ctx.globalAlpha = 0.85;
+
+  for (let i = 0; i < CANVAS_SEGS; i++) {
+    const f0 = i / CANVAS_SEGS;
+    const f1 = (i + 1) / CANVAS_SEGS;
+    const fMid = (f0 + f1) / 2;
+    const p0 = ptAt(f0);
+    const p1 = ptAt(f1);
+    const px0 = map.latLngToContainerPoint([p0[0], p0[1]]);
+    const px1 = map.latLngToContainerPoint([p1[0], p1[1]]);
+    ctx.beginPath();
+    ctx.moveTo(px0.x, px0.y);
+    ctx.lineTo(px1.x, px1.y);
+    ctx.strokeStyle = valColor(interp(fMid, frame, metric), metric);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
 function updateRiver(fi) {
   frame = fi;
-  for (let i = 0; i < NUM_SEGS; i++) { segs[i].setStyle({ color: valColor(interp((i+0.5)/NUM_SEGS, fi, metric), metric) }); }
+  redrawCanvas();
   const ts = riverData[riverCfg.sensorIds[0]].tlf[fi].x;
   ctrl.querySelector('.creek-ts').textContent = ts.toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
   ctrl.querySelector('.creek-slider').value = fi;
@@ -1042,8 +1110,8 @@ function stopRiver() { playing = false; if (timer) { clearInterval(timer); timer
 function toggleRiver() { playing ? stopRiver() : startRiver(); }
 
 const riverVis = {
-  show() { if (!bgLine) initRiver(); bgLine.setStyle({opacity:0.25}); segs.forEach(s=>s.setStyle({opacity:0.9})); ctrl.style.display=''; updateRiver(frame); },
-  hide() { if (!bgLine) return; bgLine.setStyle({opacity:0}); segs.forEach(s=>s.setStyle({opacity:0})); if(ctrl) ctrl.style.display='none'; stopRiver(); },
+  show() { if (!riverCanvas) initRiver(); if (riverCanvas) riverCanvas.style.display = ''; if (ctrl) ctrl.style.display = ''; redrawCanvas(); },
+  hide() { if (!riverCanvas) return; riverCanvas.style.display = 'none'; if (ctrl) ctrl.style.display = 'none'; stopRiver(); },
 };
 
 // Show river animation on load
