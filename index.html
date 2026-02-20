@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virridy Lume — Potomac River Sewage Spill Response</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --virridy-teal: #005151;
+    --virridy-teal-dark: #003d3d;
+    --virridy-teal-deep: #002e2e;
+    --virridy-teal-light: #007a7a;
+    --virridy-teal-muted: #e0f0f0;
+    --virridy-green: #93d500;
+    --virridy-green-dark: #7ab800;
+    --virridy-green-light: #b8e84d;
+    --virridy-green-bg: #f2fae0;
+    --text-primary: #1a2a2a;
+    --text-secondary: #545454;
+    --text-muted: #7a8a8a;
+    --bg-white: #ffffff;
+    --bg-light: #f7f9f9;
+    --border-color: #dce5e5;
+    --panel-width: 480px;
+    --header-height: 56px;
+    --alert-red: #ef4444;
+    --alert-red-bg: #fef2f2;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    color: var(--text-primary);
+  }
+
+  /* Header */
+  .header {
+    height: var(--header-height);
+    background: var(--virridy-teal);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 1000;
+    position: relative;
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-logo img {
+    height: 30px;
+    width: auto;
+  }
+  .header-divider {
+    width: 1px;
+    height: 24px;
+    background: rgba(255,255,255,0.25);
+  }
+  .header-product {
+    color: var(--virridy-green);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .header-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header-alert {
+    background: var(--alert-red);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 10px;
+    letter-spacing: 0.3px;
+    animation: pulse-alert 2s ease-in-out infinite;
+  }
+  @keyframes pulse-alert {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  .header-subtitle {
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+    font-weight: 400;
+  }
+
+  /* Main layout: map left, panel right */
+  .main-layout {
+    display: flex;
+    height: calc(100vh - var(--header-height));
+  }
+
+  /* Map */
+  #map {
+    flex: 1;
+    min-width: 0;
+    z-index: 1;
+  }
+
+  /* Side Panel — always visible */
+  .panel {
+    width: var(--panel-width);
+    flex-shrink: 0;
+    background: var(--bg-light);
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--border-color);
+  }
+
+  .panel-header {
+    background: var(--virridy-teal);
+    color: #fff;
+    padding: 16px 20px;
+    flex-shrink: 0;
+  }
+  .panel-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .panel-title {
+    font-size: 17px;
+    font-weight: 700;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .panel-reset-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 6px;
+    padding: 5px 7px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .panel-reset-btn:hover {
+    background: rgba(255,255,255,0.3);
+  }
+  .panel-meta {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
+  }
+
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Welcome / instructions state */
+  .welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    padding: 24px 24px;
+    flex: 1;
+  }
+  .welcome-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+    border-radius: 50%;
+  }
+  .welcome h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--virridy-teal);
+    margin-bottom: 10px;
+  }
+  .welcome p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 340px;
+  }
+
+  /* Incident banner */
+  .incident-banner {
+    background: var(--alert-red-bg);
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 16px;
+    width: 100%;
+    max-width: 400px;
+  }
+  .incident-banner-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--alert-red);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .incident-banner-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .incident-banner-text strong {
+    color: var(--text-primary);
+  }
+
+  /* Lume info card */
+  .lume-info {
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 14px;
+    margin-top: 16px;
+    width: 100%;
+    max-width: 400px;
+    text-align: left;
+  }
+  .lume-info-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--virridy-teal);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .lume-info-title img {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+  }
+  .lume-info-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  .lume-specs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .lume-spec {
+    background: var(--bg-light);
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+  .lume-spec-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 2px;
+  }
+  .lume-spec-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--virridy-teal);
+  }
+
+  .welcome-sensors {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 400px;
+  }
+  .welcome-sensors-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .welcome-sensor-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    font-size: 12px;
+    color: var(--text-primary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .welcome-sensor-item:hover {
+    background: var(--virridy-green-bg);
+  }
+  .welcome-sensor-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--virridy-green);
+    flex-shrink: 0;
+  }
+  .welcome-sensor-name { font-weight: 500; }
+  .welcome-sensor-region {
+    margin-left: auto;
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+
+  /* Chart content (hidden initially) */
+  .charts-content { display: none; }
+  .charts-content.active { display: contents; }
+
+  /* Chart Cards */
+  .chart-card {
+    background: var(--bg-white);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+  }
+  .chart-card-header {
+    padding: 12px 16px 4px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .chart-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .chart-card-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--virridy-teal);
+  }
+  .chart-card-body {
+    padding: 4px 10px 14px;
+    height: 190px;
+    position: relative;
+  }
+  .chart-card-body canvas { width: 100% !important; }
+  .chart-card-body-tall { height: 230px; }
+  .chart-card-values {
+    display: flex;
+    gap: 10px;
+    padding: 2px 16px 6px;
+    flex-wrap: wrap;
+  }
+  .chart-card-value-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .chart-card-value-chip b {
+    font-weight: 700;
+    color: var(--virridy-teal);
+  }
+  .chip-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Categorical legend */
+  .cat-legend {
+    display: flex;
+    gap: 12px;
+    padding: 0 16px 8px;
+    flex-wrap: wrap;
+  }
+  .cat-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .cat-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  /* Responsive: stack on small screens */
+  @media (max-width: 900px) {
+    .main-layout { flex-direction: column; }
+    .panel {
+      width: 100%;
+      height: 55vh;
+      border-left: none;
+      border-top: 1px solid var(--border-color);
+    }
+    #map { height: 45vh; }
+    .chart-card-body { height: 170px; }
+    .chart-card-body-tall { height: 210px; }
+  }
+
+  /* Leaflet marker styling */
+  .sensor-marker {
+    background: var(--virridy-green);
+    border: 3px solid var(--bg-white);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  .sensor-marker-yellow {
+    background: #eab308;
+    border: 3px solid var(--bg-white);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  .sensor-marker-red {
+    background: #ef4444;
+    border: 3px solid var(--bg-white);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  .sensor-tooltip {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  }
+  .reset-zoom-btn {
+    background: var(--bg-white);
+    border: 2px solid rgba(0,0,0,0.2);
+    border-radius: 4px;
+    width: 34px;
+    height: 34px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    transition: background 0.15s;
+  }
+  .reset-zoom-btn:hover { background: var(--bg-light); }
+  .reset-zoom-btn svg { width: 18px; height: 18px; }
+
+  /* Creek animation controls */
+  .creek-controls {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+  }
+  .creek-controls-inner {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 10px;
+    padding: 10px 16px 12px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.16);
+    border: 1px solid var(--border-color);
+  }
+  .creek-controls-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--virridy-teal);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .creek-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .creek-metric-select, .creek-speed-select {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    padding: 4px 6px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-white);
+    color: var(--text-primary);
+    cursor: pointer;
+    outline: none;
+  }
+  .creek-metric-select:focus, .creek-speed-select:focus {
+    border-color: var(--virridy-teal);
+  }
+  .creek-play-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: var(--virridy-teal);
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+    line-height: 1;
+  }
+  .creek-play-btn:hover { background: var(--virridy-teal-dark); }
+  .creek-slider {
+    width: 160px;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--border-color);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  .creek-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--virridy-teal);
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  }
+  .creek-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--virridy-teal);
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  }
+  .creek-ts {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    min-width: 110px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-logo">
+    <img src="https://virridy.com/wp-content/uploads/2020/09/Virridy_White_Horizontal_noTM.png" alt="Virridy">
+    <div class="header-divider"></div>
+    <span class="header-product">Lume Dashboard</span>
+  </div>
+  <div class="header-right">
+    <span class="header-alert">ACTIVE INCIDENT</span>
+    <span class="header-subtitle">Potomac River Sewage Spill Response</span>
+  </div>
+</div>
+
+<!-- Main Layout -->
+<div class="main-layout">
+  <!-- Map -->
+  <div id="map"></div>
+
+  <!-- Side Panel — always visible -->
+  <div class="panel" id="panel">
+    <div class="panel-header">
+      <div class="panel-header-top">
+        <div class="panel-title" id="panelTitle">Potomac River Monitoring</div>
+        <button class="panel-reset-btn" id="panelResetBtn" title="Reset to overview">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="none"><path d="M2 2h5v2H4v3H2V2zm7 0h5v5h-2V4H9V2zM2 9h2v3h3v2H2V9zm10 3V9h2v5H9v-2h3z" fill="#fff"/></svg>
+        </button>
+      </div>
+      <div class="panel-meta" id="panelMeta">20 monitoring sites — Seneca, MD to Indian Head, MD</div>
+    </div>
+    <div class="panel-body" id="panelBody">
+
+      <!-- Welcome / instructions (shown on load) -->
+      <div class="welcome" id="welcomeView">
+        <img class="welcome-icon" src="https://virridy.com/wp-content/uploads/2022/05/Virridy_FullColor_Monogram_NoTM-150x150.png" alt="Virridy">
+        <h2>Potomac River — Spill Response Network</h2>
+        <p>Continuous microbial contamination monitoring powered by 20 Lume sensors deployed along 55 miles of the Potomac River. Each Lume directly measures tryptophan-like fluorescence and applies data-driven modeling to estimate E. coli risk in near real time.</p>
+
+        <div class="incident-banner">
+          <div class="incident-banner-title">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1L1 14h14L8 1z" stroke="#ef4444" stroke-width="1.5" fill="none"/><path d="M8 6v4M8 11.5v.5" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Incident Summary
+          </div>
+          <div class="incident-banner-text">
+            <strong>Jan 19, 2026</strong> — 72-inch Potomac Interceptor sewer line collapsed near <strong>Lock 10, Clara Barton Pkwy</strong> in Montgomery County, MD. An estimated <strong>240+ million gallons</strong> of untreated wastewater entered the Potomac River. Fecal bacteria levels measured at <strong>2,700x above safety standards</strong>. Emergency declared Feb 18, 2026.
+          </div>
+        </div>
+
+        <div class="lume-info">
+          <div class="lume-info-title">
+            <img src="https://virridy.com/wp-content/uploads/2022/05/Virridy_FullColor_Monogram_NoTM-150x150.png" alt="Lume">
+            Powered by the Lume Sensor
+          </div>
+          <div class="lume-info-text">
+            The Lume is the first single-unit fluorimetric sensor for continuous microbial contamination monitoring. Fully integrated with cellular and satellite connectivity, each unit autonomously measures tryptophan-like fluorescence (TLF), turbidity, and temperature — delivering thousands of in-situ microbial estimates for the cost of a single grab sample.
+          </div>
+          <div class="lume-specs">
+            <div class="lume-spec">
+              <div class="lume-spec-label">Measures</div>
+              <div class="lume-spec-value">TLF, Turbidity, Temp</div>
+            </div>
+            <div class="lume-spec">
+              <div class="lume-spec-label">E. coli Accuracy</div>
+              <div class="lume-spec-value">75%+ (0-1,000 CFU)</div>
+            </div>
+            <div class="lume-spec">
+              <div class="lume-spec-label">Battery Life</div>
+              <div class="lume-spec-value">Up to 1 year</div>
+            </div>
+            <div class="lume-spec">
+              <div class="lume-spec-label">Maintenance</div>
+              <div class="lume-spec-value">No calibration req.</div>
+            </div>
+          </div>
+          <div class="lume-info-text" style="margin-bottom:0">
+            Traditional grab sampling captures a single snapshot in time, requires trained personnel to collect and transport samples to a lab, and returns results 24-48 hours later — too slow to protect public health during a fast-moving sewage spill. The Lume replaces this with continuous, autonomous monitoring: readings as often as every minute transmitted directly from the river, no site visits needed. In a crisis like the Potomac spill, where contamination levels change rapidly with flow and weather, the Lume detects dangerous spikes within minutes instead of days — enabling same-day recreational advisories, targeted confirmatory sampling, and a clear picture of how the plume is moving downstream.
+          </div>
+        </div>
+
+        <div class="welcome-sensors" id="welcomeSensorList"></div>
+      </div>
+
+      <!-- Charts (hidden until a sensor is selected) -->
+      <div class="charts-content" id="chartsView">
+        <!-- TLF / Turbidity / Temperature — combined -->
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-card-title">TLF / Turbidity / Temperature</span>
+          </div>
+          <div class="chart-card-values">
+            <span class="chart-card-value-chip tlf-chip"><span class="chip-dot" style="background:#005151"></span>TLF: <b id="valTLF">—</b></span>
+            <span class="chart-card-value-chip turb-chip"><span class="chip-dot" style="background:#8b6914"></span>Turb: <b id="valTurbidity">—</b></span>
+            <span class="chart-card-value-chip temp-chip"><span class="chip-dot" style="background:#2563eb"></span>Temp: <b id="valTemp">—</b></span>
+          </div>
+          <div class="chart-card-body chart-card-body-tall"><canvas id="chartCombo"></canvas></div>
+        </div>
+        <!-- E. coli Combined -->
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-card-title">E. coli</span>
+            <span class="chart-card-value" id="valEcoli">—</span>
+          </div>
+          <div class="chart-card-values">
+            <span class="chart-card-value-chip" id="valRiskChip"><span class="chip-dot" id="valRiskDot"></span>Risk: <b id="valRisk">—</b></span>
+          </div>
+          <div class="cat-legend">
+            <div class="cat-legend-item"><div class="cat-dot" style="background:#93d500"></div>Low</div>
+            <div class="cat-legend-item"><div class="cat-dot" style="background:#eab308"></div>Medium</div>
+            <div class="cat-legend-item"><div class="cat-dot" style="background:#f97316"></div>High</div>
+            <div class="cat-legend-item"><div class="cat-dot" style="background:#ef4444"></div>Very High</div>
+          </div>
+          <div class="chart-card-body chart-card-body-tall"><canvas id="chartEcoliCombo"></canvas></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Sensor Locations — Potomac River Sewage Spill Monitoring Network ──
+const sensors = [
+  { id: 'pt1',  name: 'Potomac — Seneca Breaks',             type: 'Sewage Spill Response', lat: 39.0692, lng: -77.3409, region: 'Seneca, MD' },
+  { id: 'pt2',  name: 'Potomac — Pennyfield Lock',           type: 'Sewage Spill Response', lat: 39.0168, lng: -77.2330, region: 'Potomac, MD' },
+  { id: 'pt3',  name: 'Potomac — Great Falls Overlook',      type: 'Sewage Spill Response', lat: 38.9986, lng: -77.2542, region: 'Great Falls, MD' },
+  { id: 'pt4',  name: 'Potomac — Widewater / Mather Gorge',  type: 'Sewage Spill Response', lat: 38.9843, lng: -77.2355, region: 'Potomac, MD' },
+  { id: 'pt5',  name: 'Potomac — Carderock Recreation Area',  type: 'Sewage Spill Response', lat: 38.9717, lng: -77.1997, region: 'Bethesda, MD', status: 'yellow' },
+  { id: 'pt6',  name: 'Potomac — Lock 10 / Clara Barton Pkwy', type: 'Sewage Spill Response', lat: 38.9723, lng: -77.1686, region: 'Cabin John, MD', status: 'red' },
+  { id: 'pt7',  name: 'Potomac — Cabin John Creek Confluence', type: 'Sewage Spill Response', lat: 38.9576, lng: -77.1535, region: 'Cabin John, MD', status: 'red' },
+  { id: 'pt8',  name: 'Potomac — Little Falls Dam',           type: 'Sewage Spill Response', lat: 38.9498, lng: -77.1276, region: 'Bethesda, MD', status: 'red' },
+  { id: 'pt9',  name: 'Potomac — Chain Bridge',               type: 'Sewage Spill Response', lat: 38.9296, lng: -77.1169, region: 'Washington, DC', status: 'red' },
+  { id: 'pt10', name: 'Potomac — Fletcher\'s Cove',           type: 'Sewage Spill Response', lat: 38.9186, lng: -77.1031, region: 'Washington, DC', status: 'red' },
+  { id: 'pt11', name: 'Potomac — Georgetown Waterfront',      type: 'Sewage Spill Response', lat: 38.9034, lng: -77.0677, region: 'Washington, DC', status: 'red' },
+  { id: 'pt12', name: 'Potomac — Roosevelt Island',           type: 'Sewage Spill Response', lat: 38.8951, lng: -77.0619, region: 'Washington, DC', status: 'red' },
+  { id: 'pt13', name: 'Potomac — Arlington Memorial Bridge',  type: 'Sewage Spill Response', lat: 38.8874, lng: -77.0555, region: 'Washington, DC', status: 'yellow' },
+  { id: 'pt14', name: 'Potomac — Hains Point',                type: 'Sewage Spill Response', lat: 38.8607, lng: -77.0233, region: 'Washington, DC', status: 'yellow' },
+  { id: 'pt15', name: 'Potomac — Anacostia Confluence',       type: 'Sewage Spill Response', lat: 38.8622, lng: -77.0101, region: 'Washington, DC', status: 'yellow' },
+  { id: 'pt16', name: 'Potomac — Blue Plains AWWTP',          type: 'Sewage Spill Response', lat: 38.8314, lng: -77.0099, region: 'Washington, DC', status: 'yellow' },
+  { id: 'pt17', name: 'Potomac — National Harbor',            type: 'Sewage Spill Response', lat: 38.7826, lng: -77.0151, region: 'Oxon Hill, MD', status: 'yellow' },
+  { id: 'pt18', name: 'Potomac — Fort Washington',            type: 'Sewage Spill Response', lat: 38.7117, lng: -77.0317, region: 'Fort Washington, MD' },
+  { id: 'pt19', name: 'Potomac — Piscataway Creek',           type: 'Sewage Spill Response', lat: 38.6925, lng: -77.0505, region: 'Accokeek, MD' },
+  { id: 'pt20', name: 'Potomac — Mattawoman Creek',           type: 'Sewage Spill Response', lat: 38.5955, lng: -77.1678, region: 'Indian Head, MD' },
+];
+
+// ── Build welcome sensor list ──
+const sensorListEl = document.getElementById('welcomeSensorList');
+const groupLabel = document.createElement('div');
+groupLabel.className = 'welcome-sensors-label';
+groupLabel.textContent = 'Monitoring Sites (upstream \u2192 downstream)';
+groupLabel.style.marginTop = '12px';
+sensorListEl.appendChild(groupLabel);
+sensors.forEach(s => {
+  const item = document.createElement('div');
+  item.className = 'welcome-sensor-item';
+  const dotColor = s.status === 'red' ? '#ef4444' : s.status === 'yellow' ? '#eab308' : '';
+  item.innerHTML = `<div class="welcome-sensor-dot"${dotColor ? ` style="background:${dotColor}"` : ''}></div><span class="welcome-sensor-name">${s.name}</span><span class="welcome-sensor-region">${s.region}</span>`;
+  item.addEventListener('click', () => openPanel(s.id));
+  sensorListEl.appendChild(item);
+});
+
+// ── Seeded Random for Reproducibility ──
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// ── Generate Mock Data ──
+function generateSensorData(sensorId) {
+  const seed = Array.from(sensorId).reduce((a, c) => a + c.charCodeAt(0), 0) * 1337;
+  const rng = mulberry32(seed);
+
+  const now = new Date();
+  const points = 30 * 24;
+  const timestamps = [];
+  for (let i = points - 1; i >= 0; i--) {
+    timestamps.push(new Date(now.getTime() - i * 3600000));
+  }
+
+  const baseTLF = 15 + rng() * 40;
+  const baseTurb = 2 + rng() * 20;
+  const baseTemp = 12 + rng() * 12;
+  const baseEcoli = 50 + rng() * 500;
+  const baseAlgae = 5 + rng() * 60;
+
+  const tlf = [], turb = [], temp = [], ecoli = [], risk = [], algae = [];
+  let tlfV = baseTLF, turbV = baseTurb, tempV = baseTemp, ecoliV = baseEcoli, algaeV = baseAlgae;
+
+  for (let i = 0; i < points; i++) {
+    const hour = timestamps[i].getHours();
+    const diurnal = Math.sin((hour - 6) / 24 * Math.PI * 2);
+
+    tlfV += (baseTLF - tlfV) * 0.02 + (rng() - 0.5) * 4 + diurnal * 2;
+    tlfV = Math.max(5, Math.min(80, tlfV));
+
+    turbV += (baseTurb - turbV) * 0.02 + (rng() - 0.5) * 2.5 + diurnal * 0.5;
+    turbV = Math.max(0.5, Math.min(50, turbV));
+
+    tempV += (baseTemp - tempV) * 0.01 + (rng() - 0.5) * 0.6 + diurnal * 1.5;
+    tempV = Math.max(8, Math.min(28, tempV));
+
+    ecoliV += (baseEcoli - ecoliV) * 0.015 + (rng() - 0.5) * ecoliV * 0.15;
+    ecoliV = Math.max(1, Math.min(2000, ecoliV));
+
+    algaeV += (baseAlgae - algaeV) * 0.015 + (rng() - 0.5) * 3 + diurnal * 2.5;
+    algaeV = Math.max(1, Math.min(150, algaeV));
+
+    if (rng() < 0.005) {
+      tlfV = Math.min(80, tlfV + 15 + rng() * 20);
+      turbV = Math.min(50, turbV + 8 + rng() * 15);
+      ecoliV = Math.min(2000, ecoliV * (2 + rng() * 3));
+      algaeV = Math.min(150, algaeV * (1.5 + rng() * 2));
+    }
+
+    tlf.push({ x: timestamps[i], y: +tlfV.toFixed(1) });
+    turb.push({ x: timestamps[i], y: +turbV.toFixed(2) });
+    temp.push({ x: timestamps[i], y: +tempV.toFixed(1) });
+    ecoli.push({ x: timestamps[i], y: +ecoliV.toFixed(0) });
+    algae.push({ x: timestamps[i], y: +algaeV.toFixed(1) });
+
+    let riskLevel;
+    if (ecoliV < 100) riskLevel = 0;
+    else if (ecoliV < 400) riskLevel = 1;
+    else if (ecoliV < 900) riskLevel = 2;
+    else riskLevel = 3;
+    risk.push({ x: timestamps[i], y: riskLevel });
+  }
+
+  return { timestamps, tlf, turb, temp, ecoli, risk, algae };
+}
+
+// ── Map Setup ──
+const map = L.map('map', { zoomControl: true });
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/">OSM</a>',
+  maxZoom: 19,
+}).addTo(map);
+
+function sensorIcon(status) {
+  const cls = status === 'red' ? 'sensor-marker-red' : status === 'yellow' ? 'sensor-marker-yellow' : 'sensor-marker';
+  return L.divIcon({ className: cls, iconSize: [18, 18], iconAnchor: [9, 9], popupAnchor: [0, -12] });
+}
+
+const markerGroup = L.featureGroup();
+sensors.forEach(s => {
+  const marker = L.marker([s.lat, s.lng], { icon: sensorIcon(s.status) }).addTo(map);
+  markerGroup.addLayer(marker);
+  marker.bindTooltip(s.name, { direction: 'top', offset: [0, -10], className: 'sensor-tooltip' });
+  marker.on('click', () => openPanel(s.id));
+});
+const initialBounds = markerGroup.getBounds();
+map.fitBounds(initialBounds, { padding: [30, 30] });
+
+// Reset zoom control
+const ResetZoom = L.Control.extend({
+  options: { position: 'topleft' },
+  onAdd: function() {
+    const btn = L.DomUtil.create('div', 'reset-zoom-btn');
+    btn.title = 'Reset zoom to all sensors';
+    btn.innerHTML = '<svg viewBox="0 0 18 18" fill="none"><path d="M3 3h4v2H5v2H3V3zm8 0h4v4h-2V5h-2V3zM3 11h2v2h2v2H3v-4zm10 2v2h-4v-2h2v-2h2v2z" fill="#333"/><circle cx="9" cy="9" r="3" stroke="#333" stroke-width="1.5" fill="none"/></svg>';
+    L.DomEvent.disableClickPropagation(btn);
+    btn.addEventListener('click', () => { riverVis.hide(); resetPanel(); map.fitBounds(initialBounds, { padding: [30, 30], animate: true }); });
+    return btn;
+  }
+});
+map.addControl(new ResetZoom());
+
+// ── River Visualization System ──
+
+function haversine(a, b) {
+  const R = 6371000, toRad = v => v * Math.PI / 180;
+  const dLat = toRad(b[0]-a[0]), dLng = toRad(b[1]-a[1]);
+  const s = Math.sin(dLat/2)**2 + Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1-s));
+}
+
+function hexRgb(h) { return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)]; }
+function lerpC(a,b,t) { return `rgb(${Math.round(a[0]+(b[0]-a[0])*t)},${Math.round(a[1]+(b[1]-a[1])*t)},${Math.round(a[2]+(b[2]-a[2])*t)})`; }
+
+const cScales = {
+  ecoli: { stops:[1,100,400,900,2000], cols:['#22c55e','#93d500','#eab308','#f97316','#ef4444'].map(hexRgb) },
+  tlf:   { stops:[5,20,35,55,80],      cols:['#22c55e','#93d500','#eab308','#f97316','#ef4444'].map(hexRgb) },
+  turb:  { stops:[0.5,5,15,30,50],     cols:['#22c55e','#93d500','#eab308','#f97316','#ef4444'].map(hexRgb) },
+  temp:  { stops:[8,14,19,24,28],       cols:['#3b82f6','#22c55e','#eab308','#f97316','#ef4444'].map(hexRgb) },
+  algae: { stops:[1,10,30,60,150],     cols:['#22c55e','#93d500','#eab308','#f97316','#ef4444'].map(hexRgb) },
+};
+function valColor(v, m) {
+  const s = cScales[m];
+  if (v <= s.stops[0]) return `rgb(${s.cols[0].join(',')})`;
+  if (v >= s.stops[s.stops.length-1]) return `rgb(${s.cols[s.cols.length-1].join(',')})`;
+  for (let i = 0; i < s.stops.length-1; i++) {
+    if (v <= s.stops[i+1]) { const t = (v-s.stops[i])/(s.stops[i+1]-s.stops[i]); return lerpC(s.cols[i], s.cols[i+1], t); }
+  }
+  return `rgb(${s.cols[s.cols.length-1].join(',')})`;
+}
+
+const NUM_SEGS = 60;
+
+// ── Potomac River Path & Visualization ──
+const riverCfg = {
+  label: 'Potomac River — Sewage Spill',
+  defaultMetric: 'ecoli',
+  sensorIds: ['pt1','pt2','pt3','pt4','pt5','pt6','pt7','pt8','pt9','pt10','pt11','pt12','pt13','pt14','pt15','pt16','pt17','pt18','pt19','pt20'],
+  sensorIdx: [0, 4, 7, 9, 14, 18, 23, 27, 31, 35, 40, 44, 47, 52, 54, 58, 62, 67, 70, 75],
+  path: [
+    // pt1 Seneca Breaks
+    [39.0692,-77.3409],
+    [39.0581,-77.3218],[39.0432,-77.3008],[39.0311,-77.2780],
+    // pt2 Pennyfield Lock
+    [39.0168,-77.2330],
+    [39.0108,-77.2488],[39.0010,-77.2535],
+    // pt3 Great Falls Overlook
+    [38.9986,-77.2542],
+    [38.9960,-77.2530],
+    // pt4 Widewater / Mather Gorge
+    [38.9843,-77.2355],
+    [38.9830,-77.2300],[38.9810,-77.2230],[38.9795,-77.2150],
+    [38.9770,-77.2080],
+    // pt5 Carderock
+    [38.9717,-77.1997],
+    [38.9700,-77.1940],[38.9690,-77.1870],[38.9710,-77.1780],
+    // pt6 Lock 10 / Clara Barton Pkwy (SPILL SITE)
+    [38.9723,-77.1686],
+    [38.9710,-77.1640],[38.9680,-77.1590],[38.9640,-77.1560],
+    // pt7 Cabin John Creek Confluence
+    [38.9576,-77.1535],
+    [38.9550,-77.1470],[38.9530,-77.1410],[38.9510,-77.1340],
+    // pt8 Little Falls Dam
+    [38.9498,-77.1276],
+    [38.9465,-77.1260],[38.9430,-77.1235],[38.9390,-77.1215],
+    // pt9 Chain Bridge
+    [38.9296,-77.1169],
+    [38.9270,-77.1140],[38.9240,-77.1110],[38.9210,-77.1065],
+    // pt10 Fletcher's Cove
+    [38.9186,-77.1031],
+    [38.9160,-77.0980],[38.9130,-77.0900],[38.9100,-77.0820],
+    [38.9080,-77.0760],
+    // pt11 Georgetown Waterfront
+    [38.9034,-77.0677],
+    [38.9010,-77.0650],[38.8990,-77.0640],[38.8970,-77.0633],
+    // pt12 Roosevelt Island
+    [38.8951,-77.0619],
+    [38.8930,-77.0590],[38.8910,-77.0575],
+    // pt13 Arlington Memorial Bridge
+    [38.8874,-77.0555],
+    [38.8850,-77.0520],[38.8820,-77.0440],[38.8780,-77.0370],
+    [38.8740,-77.0310],
+    // pt14 Hains Point
+    [38.8607,-77.0233],
+    [38.8615,-77.0170],
+    // pt15 Anacostia Confluence
+    [38.8622,-77.0101],
+    [38.8540,-77.0130],[38.8440,-77.0110],[38.8370,-77.0100],
+    // pt16 Blue Plains AWWTP
+    [38.8314,-77.0099],
+    [38.8200,-77.0120],[38.8060,-77.0135],[38.7926,-77.0143],
+    // pt17 National Harbor
+    [38.7826,-77.0151],
+    [38.7700,-77.0175],[38.7580,-77.0200],[38.7430,-77.0240],
+    [38.7290,-77.0280],
+    // pt18 Fort Washington
+    [38.7117,-77.0317],
+    [38.7050,-77.0390],[38.6985,-77.0445],
+    // pt19 Piscataway Creek
+    [38.6925,-77.0505],
+    [38.6780,-77.0720],[38.6600,-77.0950],[38.6380,-77.1180],
+    [38.6150,-77.1430],
+    // pt20 Mattawoman Creek / Indian Head
+    [38.5955,-77.1678],
+  ],
+};
+
+// Build river visualization
+const cd = [0];
+for (let i = 1; i < riverCfg.path.length; i++) cd.push(cd[i-1] + haversine(riverCfg.path[i-1], riverCfg.path[i]));
+const tl = cd[cd.length-1];
+const sf = riverCfg.sensorIdx.map(i => cd[i] / tl);
+const riverData = {};
+riverCfg.sensorIds.forEach(id => { riverData[id] = generateSensorData(id); });
+const nFrames = riverData[riverCfg.sensorIds[0]].tlf.length;
+
+function ptAt(f) {
+  const d = f * tl;
+  for (let i = 1; i < cd.length; i++) {
+    if (cd[i] >= d) { const t = (d-cd[i-1])/(cd[i]-cd[i-1]); return [riverCfg.path[i-1][0]+(riverCfg.path[i][0]-riverCfg.path[i-1][0])*t, riverCfg.path[i-1][1]+(riverCfg.path[i][1]-riverCfg.path[i-1][1])*t]; }
+  }
+  return riverCfg.path[riverCfg.path.length-1];
+}
+function interp(frac, tIdx, metric) {
+  let li = 0;
+  for (let i = 0; i < sf.length-1; i++) { if (frac >= sf[i]) li = i; }
+  const ri = Math.min(li+1, sf.length-1);
+  const t = (ri===li) ? 0 : (frac-sf[li])/(sf[ri]-sf[li]);
+  const lv = riverData[riverCfg.sensorIds[li]][metric][tIdx].y;
+  const rv = riverData[riverCfg.sensorIds[ri]][metric][tIdx].y;
+  if (metric === 'ecoli') return Math.exp(Math.log(Math.max(1,lv))*(1-t)+Math.log(Math.max(1,rv))*t);
+  return lv*(1-t)+rv*t;
+}
+
+const defaultMetric = riverCfg.defaultMetric || 'ecoli';
+let segs = [], bgLine = null, ctrl = null, playing = false, frame = nFrames-1, timer = null, speed = 12, metric = defaultMetric;
+
+function initRiver() {
+  bgLine = L.polyline(riverCfg.path, { color:'#003d3d', weight:9, opacity:0.25, lineCap:'round', lineJoin:'round' }).addTo(map);
+  for (let i = 0; i < NUM_SEGS; i++) {
+    segs.push(L.polyline([ptAt(i/NUM_SEGS), ptAt((i+1)/NUM_SEGS)], { color:'#93d500', weight:6, opacity:0.9, lineCap:'round', lineJoin:'round' }).addTo(map));
+  }
+  ctrl = document.createElement('div');
+  ctrl.className = 'creek-controls';
+  ctrl.innerHTML = `<div class="creek-controls-inner">
+    <div class="creek-controls-label">${riverCfg.label} — Water Quality Animation</div>
+    <div class="creek-controls-row">
+      <select class="creek-metric-select"><option value="ecoli" selected>E. coli</option><option value="algae">Algae (\u00b5g/L)</option><option value="tlf">TLF (ppb)</option><option value="turb">Turbidity (NTU)</option><option value="temp">Temp (\u00b0C)</option></select>
+      <button class="creek-play-btn" title="Play / Pause">&#9654;</button>
+      <input type="range" class="creek-slider" min="0" max="${nFrames-1}" value="${nFrames-1}">
+      <span class="creek-ts">\u2014</span>
+      <select class="creek-speed-select" title="Speed"><option value="6">0.5x</option><option value="12" selected>1x</option><option value="24">2x</option><option value="48">4x</option></select>
+    </div></div>`;
+  document.getElementById('map').appendChild(ctrl);
+  L.DomEvent.disableClickPropagation(ctrl);
+  L.DomEvent.disableScrollPropagation(ctrl);
+  ctrl.querySelector('.creek-play-btn').addEventListener('click', toggleRiver);
+  ctrl.querySelector('.creek-slider').addEventListener('input', e => { stopRiver(); updateRiver(+e.target.value); });
+  ctrl.querySelector('.creek-metric-select').addEventListener('change', e => { metric = e.target.value; updateRiver(frame); });
+  ctrl.querySelector('.creek-speed-select').addEventListener('change', e => { speed = +e.target.value; if (playing) { stopRiver(); startRiver(); } });
+  updateRiver(frame);
+}
+function updateRiver(fi) {
+  frame = fi;
+  for (let i = 0; i < NUM_SEGS; i++) { segs[i].setStyle({ color: valColor(interp((i+0.5)/NUM_SEGS, fi, metric), metric) }); }
+  const ts = riverData[riverCfg.sensorIds[0]].tlf[fi].x;
+  ctrl.querySelector('.creek-ts').textContent = ts.toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+  ctrl.querySelector('.creek-slider').value = fi;
+}
+function startRiver() { if (playing) return; playing = true; ctrl.querySelector('.creek-play-btn').innerHTML = '&#9646;&#9646;'; timer = setInterval(() => { frame = (frame+1)%nFrames; updateRiver(frame); }, 1000/speed); }
+function stopRiver() { playing = false; if (timer) { clearInterval(timer); timer = null; } if (ctrl) ctrl.querySelector('.creek-play-btn').innerHTML = '&#9654;'; }
+function toggleRiver() { playing ? stopRiver() : startRiver(); }
+
+const riverVis = {
+  show() { if (!bgLine) initRiver(); bgLine.setStyle({opacity:0.25}); segs.forEach(s=>s.setStyle({opacity:0.9})); ctrl.style.display=''; updateRiver(frame); },
+  hide() { if (!bgLine) return; bgLine.setStyle({opacity:0}); segs.forEach(s=>s.setStyle({opacity:0})); if(ctrl) ctrl.style.display='none'; stopRiver(); },
+};
+
+// Show river animation on load
+riverVis.show();
+
+// ── Panel Logic ──
+const panelTitle = document.getElementById('panelTitle');
+const panelMeta = document.getElementById('panelMeta');
+const panelBody = document.getElementById('panelBody');
+const welcomeView = document.getElementById('welcomeView');
+const chartsView = document.getElementById('chartsView');
+
+let charts = {};
+
+function destroyCharts() {
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+}
+
+const riskLabels = ['Low', 'Medium', 'High', 'Very High'];
+const riskColors = ['#93d500', '#eab308', '#f97316', '#ef4444'];
+
+function resetPanel() {
+  destroyCharts();
+  chartsView.classList.remove('active');
+  welcomeView.style.display = '';
+  panelTitle.textContent = 'Potomac River Monitoring';
+  panelMeta.textContent = '20 monitoring sites \u2014 Seneca, MD to Indian Head, MD';
+  panelBody.scrollTop = 0;
+}
+
+document.getElementById('panelResetBtn').addEventListener('click', () => {
+  resetPanel();
+  riverVis.show();
+  map.fitBounds(initialBounds, { padding: [30, 30], animate: true });
+});
+
+function openPanel(sensorId) {
+  const sensor = sensors.find(s => s.id === sensorId);
+  if (!sensor) return;
+
+  map.fitBounds(initialBounds, { padding: [50, 50], maxZoom: 14, animate: true });
+  riverVis.show();
+
+  destroyCharts();
+
+  // Switch from welcome to charts view
+  welcomeView.style.display = 'none';
+  chartsView.classList.add('active');
+
+  panelTitle.textContent = sensor.name;
+  panelMeta.textContent = `${sensor.type} \u2014 ${sensor.region}`;
+
+  const data = generateSensorData(sensor.id);
+
+  // Latest values
+  const lastTLF = data.tlf[data.tlf.length - 1].y;
+  const lastTurb = data.turb[data.turb.length - 1].y;
+  const lastTemp = data.temp[data.temp.length - 1].y;
+  const lastEcoli = data.ecoli[data.ecoli.length - 1].y;
+  const lastRisk = data.risk[data.risk.length - 1].y;
+
+  document.getElementById('valTLF').textContent = `${lastTLF} ppb`;
+  document.getElementById('valTurbidity').textContent = `${lastTurb} NTU`;
+  document.getElementById('valTemp').textContent = `${lastTemp} \u00b0C`;
+  document.getElementById('valEcoli').textContent = `${Math.round(lastEcoli)} MPN/100mL`;
+  document.getElementById('valRisk').textContent = riskLabels[lastRisk];
+  document.getElementById('valRiskDot').style.background = riskColors[lastRisk];
+
+  const timeAxis = {
+    type: 'time',
+    time: { unit: 'day', displayFormats: { day: 'MMM d' }, tooltipFormat: 'MMM d, yyyy  HH:mm' },
+    ticks: { maxRotation: 45, minRotation: 0, autoSkip: true, maxTicksLimit: 10, font: { size: 9 }, color: '#7a8a8a', padding: 4 },
+    grid: { display: false },
+  };
+
+  function lineDS(data, color) {
+    return { data, borderColor: color, backgroundColor: color + '18', fill: true, tension: 0.3 };
+  }
+
+  // Combined TLF / Turbidity / Temperature chart (3 y-axes)
+  charts.combo = new Chart(document.getElementById('chartCombo'), {
+    type: 'line',
+    data: {
+      datasets: [
+        { ...lineDS(data.tlf, '#005151'), label: 'TLF (ppb)', yAxisID: 'yTLF' },
+        { ...lineDS(data.turb, '#8b6914'), label: 'Turbidity (NTU)', yAxisID: 'yTurb' },
+        { ...lineDS(data.temp, '#2563eb'), label: 'Temperature (\u00b0C)', yAxisID: 'yTemp' },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 400 },
+      layout: { padding: { bottom: 4 } },
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 10, boxHeight: 10, padding: 10, font: { size: 10 }, usePointStyle: true, pointStyle: 'circle' } },
+        tooltip: { mode: 'index', intersect: false, bodyFont: { size: 11 } },
+      },
+      scales: {
+        x: timeAxis,
+        yTLF: {
+          type: 'linear', position: 'left',
+          title: { display: true, text: 'TLF (ppb)', color: '#005151', font: { size: 9, weight: '600' } },
+          ticks: { font: { size: 9 }, color: '#005151' },
+          grid: { color: '#dce5e5' },
+        },
+        yTurb: {
+          type: 'linear', position: 'right',
+          title: { display: true, text: 'Turb (NTU)', color: '#8b6914', font: { size: 9, weight: '600' } },
+          ticks: { font: { size: 9 }, color: '#8b6914' },
+          grid: { drawOnChartArea: false },
+        },
+        yTemp: {
+          type: 'linear', position: 'right',
+          title: { display: true, text: '\u00b0C', color: '#2563eb', font: { size: 9, weight: '600' } },
+          ticks: { font: { size: 9 }, color: '#2563eb' },
+          grid: { drawOnChartArea: false },
+        },
+      },
+      elements: { point: { radius: 0 }, line: { borderWidth: 1.5 } },
+      interaction: { mode: 'nearest', axis: 'x', intersect: false },
+    },
+  });
+
+  // E. coli Combined — continuous line + risk-level background bars
+  const dailyRisk = {};
+  data.risk.forEach(pt => {
+    const dayKey = pt.x.toISOString().slice(0, 10);
+    if (!dailyRisk[dayKey]) dailyRisk[dayKey] = [];
+    dailyRisk[dayKey].push(pt.y);
+  });
+  const dailyDates = Object.keys(dailyRisk).sort();
+  const dailyModes = dailyDates.map(d => {
+    const counts = [0, 0, 0, 0];
+    dailyRisk[d].forEach(v => counts[v]++);
+    return counts.indexOf(Math.max(...counts));
+  });
+  const riskBandColors = dailyModes.map(m => riskColors[m] + '30');
+
+  charts.ecoliCombo = new Chart(document.getElementById('chartEcoliCombo'), {
+    type: 'bar',
+    data: {
+      labels: dailyDates.map(d => new Date(d)),
+      datasets: [
+        {
+          type: 'bar',
+          label: 'Risk Level',
+          data: dailyModes.map(() => 2000),
+          backgroundColor: riskBandColors,
+          borderColor: dailyModes.map(m => riskColors[m] + '60'),
+          borderWidth: 0,
+          borderRadius: 2,
+          barPercentage: 0.95,
+          categoryPercentage: 1.0,
+          yAxisID: 'yEcoli',
+          order: 2,
+        },
+        {
+          type: 'line',
+          label: 'E. coli (MPN/100mL)',
+          data: data.ecoli,
+          borderColor: '#7ab800',
+          backgroundColor: '#7ab80018',
+          fill: false,
+          tension: 0.3,
+          borderWidth: 2,
+          pointRadius: 0,
+          yAxisID: 'yEcoli',
+          order: 1,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 400 },
+      layout: { padding: { bottom: 4 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          filter: (item) => item.datasetIndex === 1,
+          callbacks: {
+            title: (ctx) => {
+              if (!ctx.length) return '';
+              const d = ctx[0].parsed ? ctx[0].label : '';
+              return d;
+            },
+            afterBody: (ctx) => {
+              if (!ctx.length) return '';
+              const idx = ctx[0].dataIndex;
+              if (idx < dailyModes.length) return 'Risk: ' + riskLabels[dailyModes[idx]];
+              return '';
+            },
+          }
+        },
+      },
+      scales: {
+        x: {
+          type: 'time',
+          time: { unit: 'day', displayFormats: { day: 'MMM d' }, tooltipFormat: 'MMM d, yyyy' },
+          ticks: { maxRotation: 45, minRotation: 0, autoSkip: true, maxTicksLimit: 10, font: { size: 9 }, color: '#7a8a8a', padding: 4 },
+          grid: { display: false },
+        },
+        yEcoli: {
+          type: 'logarithmic',
+          position: 'left',
+          min: 1,
+          max: 2000,
+          title: { display: true, text: 'MPN/100mL', font: { size: 9, weight: '600' }, color: '#545454' },
+          ticks: { font: { size: 9 }, color: '#545454' },
+          grid: { color: '#dce5e5' },
+        },
+      },
+      elements: { point: { radius: 0 }, line: { borderWidth: 2 } },
+      interaction: { mode: 'nearest', axis: 'x', intersect: false },
+    }
+  });
+
+  panelBody.scrollTop = 0;
+}
+</script>
+</body>
+</html>
