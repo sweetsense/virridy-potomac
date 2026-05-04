@@ -1284,6 +1284,19 @@ function openPanel(sensorId) {
           yAxisID: 'yEcoli',
           order: 1,
         },
+        {
+          type: 'line',
+          label: 'Advisory Level (410 MPN/100mL)',
+          data: dailyDates.map(d => ({ x: new Date(d), y: 410 })),
+          borderColor: '#ef4444',
+          borderWidth: 1.5,
+          borderDash: [5, 4],
+          backgroundColor: 'transparent',
+          fill: false,
+          pointRadius: 0,
+          yAxisID: 'yEcoli',
+          order: 0,
+        },
       ]
     },
     options: {
@@ -1296,7 +1309,7 @@ function openPanel(sensorId) {
         tooltip: {
           mode: 'index',
           intersect: false,
-          filter: (item) => item.datasetIndex === 1,
+          filter: (item) => item.datasetIndex === 1 || item.datasetIndex === 2,
           callbacks: {
             title: (ctx) => {
               if (!ctx.length) return '';
